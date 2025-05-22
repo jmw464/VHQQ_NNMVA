@@ -1,0 +1,128 @@
+name: MVA_Transformer
+
+model:
+  lrs_config:
+    initial: 1e-7
+    max: 5e-4
+    end: 1e-5
+    pct_start: 0.01
+    weight_decay: 1e-5
+
+  model:
+    class_path: salt.models.SaltModel
+    init_args:
+      init_nets:
+        - input_name: smallRjets
+          dense_config:
+            output_size: &embed_dim 256
+            hidden_layers: [256]
+            activation: &activation ReLU
+        - input_name: largeRjets
+          dense_config:
+            output_size: *embed_dim
+            hidden_layers: [256]
+            activation: *activation
+
+      encoder:
+        class_path: salt.models.TransformerEncoder
+        init_args:
+          embed_dim: *embed_dim
+          num_layers: 4
+          out_dim: &out_dim 128
+          mha_config:
+            num_heads: 8
+            attention: { class_path: salt.models.ScaledDotProductAttention }
+          dense_config:
+            activation: *activation
+
+      pool_net:
+        class_path: salt.models.GlobalAttentionPooling
+        init_args: { input_size: *out_dim }
+
+      tasks:
+        class_path: torch.nn.ModuleList
+        init_args:
+          modules:
+            - class_path: salt.models.ClassificationTask
+              init_args:
+                name: events_classification
+                sample_weight: EventWeight
+                input_name: events
+                label: sampleID
+                class_names: ["hcc", "hbb", "diboson", "wjets", "zjets", "top"]
+                loss:
+                  class_path: torch.nn.CrossEntropyLoss
+                  init_args:
+                    weight: [37994.36, 2188.97, 18.71, 1.0, 1.97, 1.37]
+                    reduction: 'none'
+                dense_config: &task_dense_config
+                  input_size: *out_dim
+                  output_size: 6
+                  hidden_layers: [128, 64, 32]
+                  activation: *activation
+
+data:
+  global_object: events
+  variables:
+    events:
+      - mJ
+      - pTJ
+      - XbbTag70
+      - XccTag30
+      - pTV
+      - MET
+      - absdeltaPhiVJ
+      - deltaYVJ
+      - NAdditionalCaloJets
+      - pTsmallJ1
+      - pTsmallJ2
+      - dRsmallRJ1J2
+      - dRsmallRJ1J3
+      - dRsmallRJ2J3
+      - dRlargeRJsmallRJ1
+      - dRlargeRJsmallRJ2
+      - dRlargeRJsmallRJ3
+      - pTL1
+      - pTL2
+      - etaL1
+      - etaL2
+      - phiL1
+      - phiL2
+      - cosThetaLep
+      #- nTrackJets
+      #- nAddSmallRJets
+      #- colorRing
+    smallRjets:
+      - sj_pt
+      - sj_eta
+      - sj_phi
+      - sj_m
+      - GN2btag70
+      - GN2ctag30
+    largeRjets:
+      - fj_pt
+      - fj_eta
+      - fj_phi
+      - fj_m
+      - GN2XHbbtag70
+      - GN2XHcctag30
+
+  train_file: /global/cfs/cdirs/atlas/jmw464/run3_vhcc/H5Training/upp/all/output/pp_output_train.h5
+  val_file: /global/cfs/cdirs/atlas/jmw464/run3_vhcc/H5Training/upp/all/output/pp_output_val.h5
+  norm_dict: /global/cfs/cdirs/atlas/jmw464/run3_vhcc/H5Training/upp/all/output/norm_dict.yaml
+  class_dict: /global/cfs/cdirs/atlas/jmw464/run3_vhcc/H5Training/upp/all/output/class_dict.yaml
+  #move_files_temp: /dev/shm/svanstro/salt/gn2/
+
+  batch_size: 4000
+  num_workers: 40
+
+trainer:
+  callbacks:
+    - class_path: salt.callbacks.Checkpoint
+      init_args:
+        monitor_loss: val_events_classification_loss
+    - class_path: salt.callbacks.PredictionWriter
+  max_epochs: 40
+  accelerator: gpu
+  devices: 1
+  precision: bf16-mixed

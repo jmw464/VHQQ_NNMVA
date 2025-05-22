@@ -1,0 +1,89 @@
+name: MVA_DNN
+
+model:
+  model:
+    class_path: salt.models.SaltModel
+    init_args:
+      init_nets:
+        - input_name: events
+          attach_global: false
+          dense_config:
+            hidden_layers: [128, 128, 128]
+            output_size: 64
+            activation: &activation Mish
+
+      tasks:
+        class_path: torch.nn.ModuleList
+        init_args:
+          modules:
+            - class_path: salt.models.ClassificationTask
+              init_args:
+                name: events_classification
+                sample_weight: EventWeight
+                input_name: events
+                label: sampleID
+                class_names: ["hcc", "hbb", "diboson", "wjets", "zjets", "top"]
+                loss:
+                  class_path: torch.nn.CrossEntropyLoss
+                  init_args:
+                    weight: [37994.36, 2188.97, 18.71, 1.0, 1.97, 1.37]
+                    reduction: 'none'
+                dense_config:
+                  input_size: 64
+                  output_size: 6
+                  hidden_layers: [128]
+                  activation: *activation
+
+data:
+  global_object: events
+  variables:
+    events:
+      - mJ
+      - pTJ
+      - XbbTag70
+      - XccTag30
+      - pTV
+      - MET
+      - absdeltaPhiVJ
+      - deltaYVJ
+      - NAdditionalCaloJets
+      - pTsmallJ1
+      - pTsmallJ2
+      - dRsmallRJ1J2
+      - dRsmallRJ1J3
+      - dRsmallRJ2J3
+      - dRlargeRJsmallRJ1
+      - dRlargeRJsmallRJ2
+      - dRlargeRJsmallRJ3
+      - pTL1
+      - pTL2
+      - etaL1
+      - etaL2
+      - phiL1
+      - phiL2
+      - cosThetaLep
+      #- nTrackJets
+      #- nAddSmallRJets
+      #- colorRing
+
+
+  train_file: /global/cfs/cdirs/atlas/jmw464/run3_vhcc/H5Training/upp/all/output/pp_output_train.h5
+  val_file: /global/cfs/cdirs/atlas/jmw464/run3_vhcc/H5Training/upp/all/output/pp_output_val.h5
+  norm_dict: /global/cfs/cdirs/atlas/jmw464/run3_vhcc/H5Training/upp/all/output/norm_dict.yaml
+  class_dict: /global/cfs/cdirs/atlas/jmw464/run3_vhcc/H5Training/upp/all/output/class_dict.yaml
+  batch_size: 2000
+  num_workers: 15
+  num_train: -1
+  num_val: -1
+  num_test: -1
+
+trainer:
+  callbacks:
+    - class_path: salt.callbacks.Checkpoint
+      init_args:
+        monitor_loss: val_events_classification_loss
+    - class_path: salt.callbacks.PredictionWriter
+  max_epochs: 100
+  accelerator: gpu
+  devices: 1
+  precision: bf16-mixed

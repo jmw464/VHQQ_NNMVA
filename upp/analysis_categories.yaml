@@ -1,0 +1,31 @@
+# VHcc MMVA
+- name: hcc_mva
+  label: $H \rightarrow c\bar{c}$
+  cuts: ["sampleID == 0"]
+  colour: tab:blue
+  category: mva
+- name: hbb_mva
+  label: $H \rightarrow b\bar{b}$
+  cuts: ["sampleID == 1"]
+  colour: "#B45F06"
+  category: mva
+- name: diboson
+  label: VZ
+  cuts: ["sampleID == 2"]
+  colour: "#A300A3"
+  category: mva
+- name: wjets
+  label: W+jets
+  cuts: ["sampleID == 3"]
+  colour: "#38761D"
+  category: mva
+- name: zjets
+  label: Z+jets
+  cuts: ["sampleID == 4"]
+  colour: "red"
+  category: mva
+- name: top_mva
+  label: Top
+  cuts: ["sampleID == 5"]
+  colour: "silver"
+  category: mva

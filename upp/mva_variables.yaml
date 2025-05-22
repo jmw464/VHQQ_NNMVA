@@ -1,0 +1,76 @@
+events:
+  inputs:
+    - nTaus
+    - MET
+    - METSig
+    - softMET
+    - SUSYMET
+    - MEffBoosted
+    - absdeltaPhiVJ
+    - deltaYVJ
+    - lepPtBalance
+    - HTBoosted
+    - pTV
+    - phiV
+    - mJ
+    - pTJ
+    - D2
+    - C2
+    - NAdditionalCaloJets
+    - NLargeRJets
+    - pTsmallJ1
+    - pTsmallJ2
+    - dRsmallRJ1J2
+    - dRsmallRJ1J3
+    - dRsmallRJ2J3
+    - dRlargeRJsmallRJ1
+    - dRlargeRJsmallRJ2
+    - dRlargeRJsmallRJ3
+    - pTL1
+    - pTL2
+    - etaL1
+    - etaL2
+    - phiL1
+    - phiL2
+    - cosThetaLep
+    - XbbScore
+    - XbbTag70
+    - XbbWP
+    - XccScore
+    - XccTag30
+    - XccWP
+  labels:
+    - sampleID
+    - EventNumber
+    - EventWeight
+    - FlavourLabel
+
+smallRjets:
+  inputs:
+    - sj_pt
+    - sj_eta
+    - sj_phi
+    - sj_m
+    - sj_pb
+    - sj_pc
+    - sj_pu
+    - sj_ptau
+    - GN2btag70
+    - GN2bWP
+    - GN2ctag30
+    - GN2cWP
+
+largeRjets:
+  inputs:
+    - fj_pt
+    - fj_eta
+    - fj_phi
+    - fj_m
+    - fj_phbb
+    - fj_phcc
+    - fj_ptop
+    - fj_pqcd
+    - GN2XHbbtag70
+    - GN2XHbbWP
+    - GN2XHcctag30
+    - GN2XHccWP

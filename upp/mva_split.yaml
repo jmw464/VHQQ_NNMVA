@@ -1,0 +1,7 @@
+# simple split on event number: 80/10/10 train/val/test
+train:
+  - [EventNumber, "%10<=", 7]
+val:
+  - [EventNumber, "%10==", 8]
+test:
+  - [EventNumber, "%10==", 9]

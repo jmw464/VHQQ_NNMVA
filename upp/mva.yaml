@@ -1,0 +1,76 @@
+variables: !include mva_variables.yaml
+global_cuts: !include mva_split.yaml 
+
+all: &all
+  name: all
+  equal_jets: False
+  pattern:
+    - "0L_a/*.h5"
+    - "0L_d/*.h5"
+    - "0L_e/*.h5"
+    - "1L_a/*.h5"
+    - "1L_d/*.h5"
+    - "1L_e/*.h5"
+    - "2L_a/*.h5"
+    - "2L_d/*.h5"
+    - "2L_e/*.h5"
+
+inclusive_ptv: &inclusive_ptv
+  name: inclusive_ptv
+  cuts:
+  - [pTV, ">", 0]
+
+components:
+  - region:
+      <<: *inclusive_ptv
+    sample:
+      <<: *all
+    flavours: [hcc_mva]
+    num_jets: 4_000_000
+  - region:
+      <<: *inclusive_ptv
+    sample:
+      <<: *all
+    flavours: [hbb_mva]
+    num_jets: 3_500_000
+  - region:
+      <<: *inclusive_ptv
+    sample:
+      <<: *all
+    flavours: [diboson]
+    num_jets: 6_500_000
+  - region:
+      <<: *inclusive_ptv
+    sample:
+      <<: *all
+    flavours: [wjets]
+    num_jets: 39_000_000
+  - region:
+      <<: *inclusive_ptv
+    sample:
+      <<: *all
+    flavours: [zjets]
+    num_jets: 62_000_000
+  - region:
+      <<: *inclusive_ptv
+    sample:
+      <<: *all
+    flavours: [top_mva]
+    num_jets: 27_000_000
+
+resampling:
+  method: none
+  target: hcc_mva
+  variables:
+    pTV:
+      bins: [[0, 1_000_000, 50]]
+
+# note: sensible defaults are defined in the PreprocessingConfig constructor
+global:
+  jets_name: events
+  batch_size: 1_000_000
+  num_jets_estimate: 100_000_000 #42_257_773 - 0L, 53_725_576 - 2L
+  num_jets_estimate_norm: 20_000_000
+  flavour_config: /global/homes/j/jmw464/ATLAS/HCC/Boosted/analysis_categories.yaml
+  base_dir: /global/cfs/cdirs/atlas/jmw464/run3_vhcc/H5Training/kfold/upp/fold9/
+  ntuple_dir: /global/cfs/cdirs/atlas/jmw464/run3_vhcc/H5Training/kfold/
